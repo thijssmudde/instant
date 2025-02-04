@@ -819,7 +819,6 @@ export default function Landing2024() {
         <meta name="description" content="A Graph Database on the Client" />
       </Head>
       <GlowBackground>
-        
         {/* 
           hiring-page
         <div className="w-full bg-gray-50/80 p-1 text-center">

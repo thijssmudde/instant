@@ -1,7 +1,14 @@
 import { id, tx } from '@instantdb/core';
 import { InstantReactWebDatabase } from '@instantdb/react';
 import { isObject, debounce, last } from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState, useContext } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useContext,
+} from 'react';
 import { jsonFetch } from '@/lib/fetch';
 import config from '@/lib/config';
 import produce from 'immer';
@@ -152,7 +159,7 @@ function queryToFilters({
                 JSON.parse(part.value),
               ],
             ];
-          } catch (e) { }
+          } catch (e) {}
         }
         if (attr.checkedDataType === 'date') {
           try {
@@ -179,7 +186,7 @@ function queryToFilters({
                 opToInstaqlOp(part.operator),
                 JSON.parse(part.value),
               ]);
-            } catch (e) { }
+            } catch (e) {}
             break;
           }
           default: {
@@ -223,7 +230,7 @@ function sameFilters(
 
 const excludedSearchAttrs: [string, string][] = [
   // Exclude computed fields
-  ["$files", "url"]
+  ['$files', 'url'],
 ];
 
 function SearchInput({
@@ -266,7 +273,9 @@ function SearchInput({
   const comboOptions: { field: string; operator: string; display: string }[] = (
     attrs || []
   ).flatMap((a) => {
-    const isExcluded = excludedSearchAttrs.some(([ns, name]) => ns === a.namespace && name === a.name);
+    const isExcluded = excludedSearchAttrs.some(
+      ([ns, name]) => ns === a.namespace && name === a.name,
+    );
     if (a.type === 'ref' || isExcluded) {
       return [];
     }
@@ -456,7 +465,8 @@ export function Explorer({
 
   const isSystemCatalogNs = selectedNamespace?.name?.startsWith('$') ?? false;
   const sanitizedNsName = selectedNamespace?.name ?? '';
-  const readOnlyNs = isSystemCatalogNs && !['$users', '$files'].includes(sanitizedNsName);
+  const readOnlyNs =
+    isSystemCatalogNs && !['$users', '$files'].includes(sanitizedNsName);
 
   const [limit, setLimit] = useState(50);
   const [offsets, setOffsets] = useState<{ [namespace: string]: number }>({});
@@ -508,8 +518,12 @@ export function Explorer({
   );
   const rowText =
     sanitizedNsName === '$files'
-      ? Object.keys(checkedIds).length === 1 ? 'file' : 'files'
-      : Object.keys(checkedIds).length === 1 ? 'row' : 'rows';
+      ? Object.keys(checkedIds).length === 1
+        ? 'file'
+        : 'files'
+      : Object.keys(checkedIds).length === 1
+        ? 'row'
+        : 'rows';
 
   // Storage
 
@@ -571,9 +585,11 @@ export function Explorer({
               }
               onClick={async () => {
                 try {
-                  if (selectedNamespace.name === "$files") {
-                    const filenames = allItems.filter(i => i.id in checkedIds).map(i => i.path as string);
-                    await bulkDeleteFiles(token, appId, filenames)
+                  if (selectedNamespace.name === '$files') {
+                    const filenames = allItems
+                      .filter((i) => i.id in checkedIds)
+                      .map((i) => i.path as string);
+                    await bulkDeleteFiles(token, appId, filenames);
                   } else {
                     await db.transact(
                       Object.keys(checkedIds).map((id) =>
@@ -783,8 +799,7 @@ export function Explorer({
               </div>
             </div>
           </div>
-          {selectedNamespace.name === "$files"
-            ?
+          {selectedNamespace.name === '$files' ? (
             <div className="flex py-2 px-2 gap-2">
               <div className="flex gap-2 w-full">
                 <div className="flex gap-2 flex-shrink-0">
@@ -807,11 +822,13 @@ export function Explorer({
                     loading={uploadingFile}
                     onClick={handleUploadFile}
                   >
-                    {uploadingFile ? "Uploading..." : "Upload file"}
+                    {uploadingFile ? 'Uploading...' : 'Upload file'}
                   </Button>
                 </div>
                 <div className="relative flex flex-1 max-w-[67vw] min-w-0">
-                  <span className="absolute inset-y-0 left-0 flex items-center px-3 text-sm text-zinc-500 bg-gray-100 rounded-l-md ">File Path:</span>
+                  <span className="absolute inset-y-0 left-0 flex items-center px-3 text-sm text-zinc-500 bg-gray-100 rounded-l-md ">
+                    File Path:
+                  </span>
                   <input
                     type="text"
                     placeholder="Enter a custom path (optional)"
@@ -822,10 +839,9 @@ export function Explorer({
                 </div>
               </div>
             </div>
-            : null}
+          ) : null}
           <div className="flex items-center justify-start space-x-2 p-1 text-xs border-b">
-            {selectedNamespace.name !== "$files"
-              ?
+            {selectedNamespace.name !== '$files' ? (
               <Button
                 disabled={readOnlyNs}
                 title={
@@ -841,7 +857,7 @@ export function Explorer({
               >
                 Add row
               </Button>
-              : null}
+            ) : null}
             <div>
               <Select
                 className="text-xs"
@@ -1002,32 +1018,35 @@ export function Explorer({
                       onClick={
                         attr.sortable
                           ? () => {
-                            replaceNavStackTop({
-                              sortAttr: attr.name,
-                              sortAsc:
-                                sortAttr !== attr.name ? true : !sortAsc,
-                            });
-                          }
-                          : attr.name === 'id'
-                            ? () => {
                               replaceNavStackTop({
-                                sortAttr: 'serverCreatedAt',
+                                sortAttr: attr.name,
                                 sortAsc:
-                                  sortAttr !== 'serverCreatedAt'
-                                    ? true
-                                    : !sortAsc,
+                                  sortAttr !== attr.name ? true : !sortAsc,
                               });
                             }
+                          : attr.name === 'id'
+                            ? () => {
+                                replaceNavStackTop({
+                                  sortAttr: 'serverCreatedAt',
+                                  sortAsc:
+                                    sortAttr !== 'serverCreatedAt'
+                                      ? true
+                                      : !sortAsc,
+                                });
+                              }
                             : undefined
                       }
                     >
                       <div className="flex items-center gap-2">
-                        {(selectedNamespace.name === "$files" && attr.name === "url") ? "" : attr.name}
+                        {selectedNamespace.name === '$files' &&
+                        attr.name === 'url'
+                          ? ''
+                          : attr.name}
                         {attr.sortable || attr.name === 'id' ? (
                           <span>
                             {sortAttr === attr.name ||
-                              (sortAttr === 'serverCreatedAt' &&
-                                attr.name === 'id') ? (
+                            (sortAttr === 'serverCreatedAt' &&
+                              attr.name === 'id') ? (
                               sortAsc ? (
                                 '↓'
                               ) : (
@@ -1067,7 +1086,7 @@ export function Explorer({
                           );
                         }}
                       />
-                      {(readOnlyNs || sanitizedNsName === "$files") ? null : (
+                      {readOnlyNs || sanitizedNsName === '$files' ? null : (
                         <button
                           className="opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => setEditableRowId(item.id)}
@@ -1087,22 +1106,25 @@ export function Explorer({
                               : '80px',
                         }}
                       >
-                        {selectedNamespace.name === "$files" && attr.name === "url"
-                          ? <Button
-                            variant='secondary'
-                            size='mini'
+                        {selectedNamespace.name === '$files' &&
+                        attr.name === 'url' ? (
+                          <Button
+                            variant="secondary"
+                            size="mini"
                             onClick={() => {
                               window.open(item.url as string, '_blank');
-                            }}>
+                            }}
+                          >
                             View File
                           </Button>
-                          : <ExplorerItemVal
+                        ) : (
+                          <ExplorerItemVal
                             item={item}
                             attr={attr}
                             onClickLink={() => {
                               const linkConfigDir =
                                 attr.linkConfig[
-                                !attr.isForward ? 'forward' : 'reverse'
+                                  !attr.isForward ? 'forward' : 'reverse'
                                 ];
                               if (linkConfigDir) {
                                 pushNavStack({
@@ -1111,7 +1133,8 @@ export function Explorer({
                                 });
                               }
                             }}
-                          />}
+                          />
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -1368,7 +1391,7 @@ async function upload(
 async function bulkDeleteFiles(
   token: string,
   appId: string,
-  filenames: string[]
+  filenames: string[],
 ): Promise<any> {
   const { data } = await jsonFetch(
     `${config.apiURI}/dash/apps/${appId}/storage/files/delete`,
@@ -1379,7 +1402,7 @@ async function bulkDeleteFiles(
         authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ filenames }),
-    }
+    },
   );
 
   return data;
